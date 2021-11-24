@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Girocode-Generator</title>
+        <link rel="stylesheet" href="gh-fork-ribbon.css"/>
+    </head>
+    <body>
+        <style>
+            .error {
+                color: red;
+                display: none;
+            }
+
+            .row {
+                display: flex;
+            }
+            
+            .column {
+                flex: 50%;
+            }
+        </style>
+        <div class="row">
+            <div class="column">
+                <a class="github-fork-ribbon" href="https://github.com/askeron/girocode-generator" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+                <h1>Girocode-Generator</h1>
+                <form>
+                    <label for="name">Name des Zahlungsempfängers:
+                        <br><input id="name" maxlength=70>
+                    </label><br>
+                    <label for="iban">IBAN:
+                        <br><input id="iban"> <span id="iban-error" class="error">ungültige IBAN</span>
+                    </label><br>
+                    <label for="bic">BIC:
+                        <br><input id="bic">
+                    </label><br>
+                    <label for="amount">Betrag in EUR:
+                        <br><input id="amount"> <span id="amount-error" class="error">ungültiges Format (z.B. 1234,56)</span>
+                    </label><br>
+                    <label for="reference-text">Verwendungszweck:
+                        <br><input id="reference-text" maxlength=140>
+                    </label><br>
+                </form>
+                <br>
+                <a href="" id="link">Link für Lesezeichen mit diesen Werten</a>
+            </div>
+            <div class="column">
+                <img id="image">
+            </div>
+        </div>
+
+        <script src="iban.js"></script>
+        <script src="qrious.js"></script>
+        <script>
+            function drawImage() {
+                document.getElementById("iban-error").style.display = IBAN.isValid(document.getElementById("iban").value) ? "none" : "inline"
+                document.getElementById("amount-error").style.display = document.getElementById("amount").value.replaceAll(",", ".").match(/^\d+\.\d{2}$/) ? "none" : "inline"
+                const qrcodeText = [
+                    "BCD",
+                    "002",
+                    "1",
+                    "SCT",
+                    document.getElementById("bic").value,
+                    document.getElementById("name").value,
+                    document.getElementById("iban").value,
+                    "EUR"+document.getElementById("amount").value.replaceAll(",", "."),
+                    "",
+                    "",
+                    document.getElementById("reference-text").value,
+                    "",
+                ].join('\n')
+                const image = document.getElementById("image")
+                image.src = new QRious({
+                    value: qrcodeText,
+                    level: 'H',
+                    padding: 45,
+                    size: 600,
+                }).toDataURL()
+
+
+                document.getElementById("link").href = `?name=${encodeURIComponent(document.getElementById("name").value)}&iban=${encodeURIComponent(document.getElementById("iban").value)}&bic=${encodeURIComponent(document.getElementById("bic").value)}&amount=${encodeURIComponent(document.getElementById("amount").value)}&reference-text=${encodeURIComponent(document.getElementById("reference-text").value)}`
+            }
+            
+            const url = new URL(window.location);
+            document.getElementById("name").value = url.searchParams.get("name")
+            document.getElementById("iban").value = url.searchParams.get("iban")
+            document.getElementById("bic").value = url.searchParams.get("bic")
+            document.getElementById("amount").value = url.searchParams.get("amount")
+            document.getElementById("reference-text").value = url.searchParams.get("reference-text")
+
+            Array.from(document.getElementsByTagName("input")).forEach(x => {
+                x.onchange = drawImage
+                x.onkeypress = drawImage
+                x.onkeyup = drawImage
+            });
+
+            drawImage()
+        </script>
+    </body>
+</html>
