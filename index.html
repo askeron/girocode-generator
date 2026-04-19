@@ -52,7 +52,8 @@
         <script src="qrious.js"></script>
         <script>
             function drawImage() {
-                document.getElementById("iban-error").style.display = IBAN.isValid(document.getElementById("iban").value) ? "none" : "inline"
+                const ibanCleaned = document.getElementById("iban").value.replaceAll(" ", "")
+                document.getElementById("iban-error").style.display = IBAN.isValid(ibanCleaned) ? "none" : "inline"
                 document.getElementById("amount-error").style.display = document.getElementById("amount").value.replaceAll(",", ".").match(/^\d+\.\d{2}$/) ? "none" : "inline"
                 const qrcodeText = [
                     "BCD",
@@ -61,7 +62,7 @@
                     "SCT",
                     document.getElementById("bic").value,
                     document.getElementById("name").value,
-                    document.getElementById("iban").value,
+                    ibanCleaned,
                     "EUR"+document.getElementById("amount").value.replaceAll(",", "."),
                     "",
                     "",
